@@ -2,78 +2,80 @@
  * vidDisplay.cpp
  * Name: Jaden Zhou
  * Date: Jan 2026
- * Purpose: Display live video feed, quit on 'q', save frame on 's', toggle grayscale with 'g'
+ * Purpose: Display live video feed with keypress features:
+ *          - 'q' = quit
+ *          - 'g' = OpenCV grayscale
+ *          - 'h' = custom grayscale
+ *          - 's' = save
+ *          - 'q' = quit
  */
 
+#include "filters.h"
 #include "opencv2/opencv.hpp" // general openCV header file
 
-#include <cstdio>  // standard io functions and allocation
-#include <cstring> // string functions
+#include <cstdio> // standard io functions and allocation
+#include <ctime>
 
-/*
- * main
- * Opens the default camera and displays frames in a window.
- * - 'q' to quit
- * - 's' to save the current frame to ../out/
- * - 'g' toggles grayscale display
- */
+enum DisplayMode { MODE_COLOR, MODE_OPENCV_GRAY, MODE_CUSTOM_GRAY };
+
 int main(int argc, char* argv[]) {
-  cv::VideoCapture* capdev;
 
-  // open the video device
-  capdev = new cv::VideoCapture(0);
-  if (!capdev->isOpened()) {
+  cv::VideoCapture capdev(0);
+  if (!capdev.isOpened()) {
     printf("Unable to open video device\n");
-    return (-1);
+    return -1;
   }
 
   // get some properties of the image
-  cv::Size refS((int)capdev->get(cv::CAP_PROP_FRAME_WIDTH),
-                (int)capdev->get(cv::CAP_PROP_FRAME_HEIGHT));
+  cv::Size refS((int)capdev.get(cv::CAP_PROP_FRAME_WIDTH),
+                (int)capdev.get(cv::CAP_PROP_FRAME_HEIGHT));
   printf("Expected size: %d %d\n", refS.width, refS.height);
 
   const char* windowName = "Video";
   cv::namedWindow(windowName, 1); // identifies a window
 
   cv::Mat frame;
-  cv::Mat gray;
+  cv::Mat gray1;
   cv::Mat display;
-
-  bool grayscale = false; // store grayscale keypress choice
+  DisplayMode mode = MODE_COLOR;
 
   for (;;) {
-    *capdev >> frame; // get a new frame from the camera, treat as a stream
+    capdev >> frame; // get a new frame from the camera, treat as a stream
     if (frame.empty()) {
       printf("frame is empty\n");
       break;
     }
 
-    if (grayscale) {
-      // convert BGR -> Gray
-      cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
-      // convert Gray -> BGR so display is still 3-channel
-      cv::cvtColor(gray, display, cv::COLOR_GRAY2BGR);
-    } else {
+    if (mode == MODE_COLOR) {
       display = frame;
+    } else if (mode == MODE_OPENCV_GRAY) {
+      // convert BGR -> Gray
+      cv::cvtColor(frame, gray1, cv::COLOR_BGR2GRAY);
+      // convert Gray -> BGR so display is still 3-channel
+      cv::cvtColor(gray1, display, cv::COLOR_GRAY2BGR);
+    } else if (mode == MODE_CUSTOM_GRAY) {
+      grayscale(frame, display);
     }
 
     cv::imshow(windowName, frame);
 
     // see if there is a waiting keystroke
-    char key = cv::waitKey(10);
+    char key = (char)cv::waitKey(10);
     if (key == 'q') {
       break;
-    } else if (key == 'g') { // toggle grayscale
-      grayscale = true;
     } else if (key == 'r') { // reset display
-      grayscale = false;
+      mode = MODE_COLOR;
+    } else if (key == 'g') { // OpenCV grayscale
+      mode = MODE_OPENCV_GRAY;
+    } else if (key == 'h') {
+      mode = MODE_CUSTOM_GRAY;
     } else if (key == 's') {
       // timestamped filename
       std::time_t t = std::time(nullptr);
       char outname[256];
       std::snprintf(outname, sizeof(outname), "../out/frame_%ld.png", (long)t);
 
-      bool ok = cv::imwrite(outname, frame);
+      bool ok = cv::imwrite(outname, display);
       if (ok) {
         printf("Saved: %s\n", outname);
       } else {
@@ -82,6 +84,6 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  delete capdev;
-  return (0);
+  cv::destroyWindow(windowName);
+  return 0;
 }
