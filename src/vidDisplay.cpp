@@ -16,7 +16,7 @@
 #include <cstdio> // standard io functions and allocation
 #include <ctime>
 
-enum DisplayMode { MODE_COLOR, MODE_OPENCV_GRAY, MODE_CUSTOM_GRAY, MODE_SEPIA };
+enum DisplayMode { MODE_COLOR, MODE_OPENCV_GRAY, MODE_CUSTOM_GRAY, MODE_SEPIA, MODE_BLUR };
 
 int main(int argc, char* argv[]) {
 
@@ -54,37 +54,47 @@ int main(int argc, char* argv[]) {
       // convert Gray -> BGR so display is still 3-channel
       cv::cvtColor(gray1, display, cv::COLOR_GRAY2BGR);
     } else if (mode == MODE_CUSTOM_GRAY) {
-      grayscale(frame, display);
+      if (grayscale(frame, display) != 0) {
+        display = frame;
+      }
     } else if (mode == MODE_SEPIA) {
-      sepia(frame, display);
+      if (sepia(frame, display) != 0) {
+        display = frame;
+      }
+    } else if (mode == MODE_BLUR) {
+      //   if (blur5x5_1(frame, display) != 0) {
+      if (blur5x5_2(frame, display) != 0) {
+        display = frame;
+      }
     }
 
-    cv::imshow(windowName, frame);
+    cv::imshow(windowName, display);
 
     // see if there is a waiting keystroke
     char key = (char)cv::waitKey(10);
     if (key == 'q') {
       break;
-    } else if (key == 'r') { // reset display
-      mode = MODE_COLOR;
-    } else if (key == 'g') { // OpenCV grayscale
-      mode = MODE_OPENCV_GRAY;
-    } else if (key == 'h') {
-      mode = MODE_CUSTOM_GRAY;
-    } else if (key == 'p') {
-      mode = MODE_SEPIA;
     } else if (key == 's') {
       // timestamped filename
       std::time_t t = std::time(nullptr);
       char outname[256];
       std::snprintf(outname, sizeof(outname), "../out/frame_%ld.png", (long)t);
 
-      bool ok = cv::imwrite(outname, display);
-      if (ok) {
+      if (cv::imwrite(outname, display)) {
         printf("Saved: %s\n", outname);
       } else {
         printf("Failed to save: %s\n", outname);
       }
+    } else if (key == 'r') { // reset display
+      mode = MODE_COLOR;
+    } else if (key == 'g') { // OpenCV grayscale
+      mode = MODE_OPENCV_GRAY;
+    } else if (key == 'h') { // custom grayscale
+      mode = MODE_CUSTOM_GRAY;
+    } else if (key == 'p') { // Sepia tone filter
+      mode = MODE_SEPIA;
+    } else if (key == 'b') { // 5x5 blur filter
+      mode = MODE_BLUR;
     }
   }
 

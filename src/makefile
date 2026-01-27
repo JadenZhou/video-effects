@@ -35,6 +35,10 @@ vid: vidDisplay.o filters.o
 	mkdir -p $(BINDIR)
 	$(CXX) $^ -o $(BINDIR)/$@ $(LDLIBS)
 
+time: timeBlur.o filters.o
+	mkdir -p $(BINDIR)
+	$(CXX) $^ -o $(BINDIR)/$@ $(LDLIBS)
+
 
 clean:
 	rm -f *.o *~

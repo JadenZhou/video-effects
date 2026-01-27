@@ -16,4 +16,10 @@ int grayscale(cv::Mat& src, cv::Mat& dst);
 // Sepia tone filter
 int sepia(cv::Mat& src, cv::Mat& dst);
 
+// Naive 5x5 blur filter
+int blur5x5_1(cv::Mat& src, cv::Mat& dst);
+
+// Faster 5x5 blur filter
+int blur5x5_2(cv::Mat& src, cv::Mat& dst);
+
 #endif
