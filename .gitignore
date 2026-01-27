@@ -1,4 +1,10 @@
-**.o
-bin/
+# config
 .clang-format
 .vscode
+
+# directories
+bin/
+data/
+
+# executables
+**.o
