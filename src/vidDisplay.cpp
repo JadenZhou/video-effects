@@ -26,7 +26,8 @@ enum DisplayMode {
   MODE_SEPIA,
   MODE_BLUR,
   MODE_SOBEL_X,
-  MODE_SOBEL_Y
+  MODE_SOBEL_Y,
+  MODE_MAG
 };
 
 int main(int argc, char* argv[]) {
@@ -93,6 +94,12 @@ int main(int argc, char* argv[]) {
       } else {
         display = frame;
       }
+    } else if (mode == MODE_MAG) {
+      if (sobelX3x3(frame, sx16) == 0 && sobelY3x3(frame, sy16) == 0) {
+        magnitude(sx16, sy16, display); // display becomes CV_8UC3
+      } else {
+        display = frame;
+      }
     }
 
     cv::imshow(windowName, display);
@@ -126,6 +133,8 @@ int main(int argc, char* argv[]) {
       mode = MODE_SOBEL_X;
     } else if (key == 'y') { // 3x3 Sobel Y
       mode = MODE_SOBEL_Y;
+    } else if (key == 'm') { // Gradient Magnitude
+      mode = MODE_MAG;
     }
   }
 

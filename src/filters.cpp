@@ -7,6 +7,8 @@
 
 #include "filters.h"
 
+#include <cmath>
+
 /*
  * grayscale
  * Converts a BGR color image to a custom grayscale image.
@@ -280,6 +282,49 @@ int sobelY3x3(cv::Mat& src, cv::Mat& dst) {
     for (int c = 1; c < src.cols - 1; c++) {
       for (int ch = 0; ch < 3; ch++) {
         dp[c][ch] = (short)(up[c][ch] - dn[c][ch]); // range [-2040,2040]
+      }
+    }
+  }
+
+  return 0;
+}
+
+/*
+ * magnitude
+ * Computes gradient magnitude image from Sobel X and Sobel Y images.
+ * Arguments:
+ * - sx: CV_16SC3 Sobel X result
+ * - sy: CV_16SC3 Sobel Y result
+ * - dst: output CV_8UC3 magnitude image
+ * Returns:
+ * - 0 on success, -1 on error
+ */
+int magnitude(cv::Mat& sx, cv::Mat& sy, cv::Mat& dst) {
+
+  if (sx.empty() || sy.empty())
+    return -1;
+  if (sx.size() != sy.size())
+    return -1;
+  if (sx.type() != CV_16SC3 || sy.type() != CV_16SC3)
+    return -1;
+
+  dst.create(sx.size(), CV_8UC3);
+
+  for (int r = 0; r < sx.rows; r++) {
+    const cv::Vec3s* xptr = sx.ptr<cv::Vec3s>(r);
+    const cv::Vec3s* yptr = sy.ptr<cv::Vec3s>(r);
+    cv::Vec3b* dptr = dst.ptr<cv::Vec3b>(r);
+
+    for (int c = 0; c < sx.cols; c++) {
+      for (int ch = 0; ch < 3; ch++) {
+        int x = (int)xptr[c][ch];
+        int y = (int)yptr[c][ch];
+
+        int mag = (int)std::sqrt((double)(x * x + y * y));
+        if (mag > 255)
+          mag = 255;
+
+        dptr[c][ch] = (unsigned char)mag;
       }
     }
   }

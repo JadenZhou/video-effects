@@ -28,4 +28,7 @@ int sobelX3x3(cv::Mat& src, cv::Mat& dst);
 // 3x3 Sobel Y filter
 int sobelY3x3(cv::Mat& src, cv::Mat& dst);
 
+// Gradient magnitude with Euclidean distance
+int magnitude(cv::Mat& sx, cv::Mat& sy, cv::Mat& dst);
+
 #endif
