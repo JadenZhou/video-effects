@@ -10,7 +10,10 @@
 
 #include <opencv2/opencv.hpp>
 
-// Custom grayscale (different from OpenCV cvtColor)
+// Custom grayscale
 int grayscale(cv::Mat& src, cv::Mat& dst);
+
+// Sepia tone filter
+int sepia(cv::Mat& src, cv::Mat& dst);
 
 #endif

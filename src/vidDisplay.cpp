@@ -16,7 +16,7 @@
 #include <cstdio> // standard io functions and allocation
 #include <ctime>
 
-enum DisplayMode { MODE_COLOR, MODE_OPENCV_GRAY, MODE_CUSTOM_GRAY };
+enum DisplayMode { MODE_COLOR, MODE_OPENCV_GRAY, MODE_CUSTOM_GRAY, MODE_SEPIA };
 
 int main(int argc, char* argv[]) {
 
@@ -55,6 +55,8 @@ int main(int argc, char* argv[]) {
       cv::cvtColor(gray1, display, cv::COLOR_GRAY2BGR);
     } else if (mode == MODE_CUSTOM_GRAY) {
       grayscale(frame, display);
+    } else if (mode == MODE_SEPIA) {
+      sepia(frame, display);
     }
 
     cv::imshow(windowName, frame);
@@ -69,6 +71,8 @@ int main(int argc, char* argv[]) {
       mode = MODE_OPENCV_GRAY;
     } else if (key == 'h') {
       mode = MODE_CUSTOM_GRAY;
+    } else if (key == 'p') {
+      mode = MODE_SEPIA;
     } else if (key == 's') {
       // timestamped filename
       std::time_t t = std::time(nullptr);
