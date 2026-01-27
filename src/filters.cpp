@@ -199,3 +199,90 @@ int blur5x5_2(cv::Mat& src, cv::Mat& dst) {
 
   return 0;
 }
+
+/*
+ * sobelX3x3
+ * Computes Sobel X (positive right) using separable filters:
+ *  vertical [1 2 1]^T then horizontal [-1 0 1]
+ * Output is CV_16SC3.
+ */
+int sobelX3x3(cv::Mat& src, cv::Mat& dst) {
+
+  if (src.empty() || src.type() != CV_8UC3)
+    return -1;
+
+  cv::Mat temp(src.size(), CV_16SC3);
+  dst.create(src.size(), CV_16SC3);
+  dst.setTo(cv::Scalar(0, 0, 0));
+
+  // Vertical smoothing: temp(r,c) = src(r-1,c) + 2*src(r,c) + src(r+1,c)
+  for (int r = 1; r < src.rows - 1; r++) {
+    const cv::Vec3b* up = src.ptr<cv::Vec3b>(r - 1);
+    const cv::Vec3b* cp = src.ptr<cv::Vec3b>(r);
+    const cv::Vec3b* dn = src.ptr<cv::Vec3b>(r + 1);
+    cv::Vec3s* tp = temp.ptr<cv::Vec3s>(r);
+
+    for (int c = 0; c < src.cols; c++) {
+      for (int ch = 0; ch < 3; ch++) {
+        tp[c][ch] = (short)(up[c][ch] + 2 * cp[c][ch] + dn[c][ch]); // max 1020
+      }
+    }
+  }
+
+  // Horizontal derivative: dst(r,c) = -temp(r,c-1) + temp(r,c+1)
+  for (int r = 1; r < src.rows - 1; r++) {
+    const cv::Vec3s* tp = temp.ptr<cv::Vec3s>(r);
+    cv::Vec3s* dp = dst.ptr<cv::Vec3s>(r);
+
+    for (int c = 1; c < src.cols - 1; c++) {
+      for (int ch = 0; ch < 3; ch++) {
+        dp[c][ch] = (short)(-tp[c - 1][ch] + tp[c + 1][ch]); // range [-2040,2040]
+      }
+    }
+  }
+
+  return 0;
+}
+
+/*
+ * sobelY3x3
+ * Computes Sobel Y (positive up) using separable filters:
+ *  horizontal [1 2 1] then vertical [1 0 -1]^T  (up - down)
+ * Output is CV_16SC3.
+ */
+int sobelY3x3(cv::Mat& src, cv::Mat& dst) {
+
+  if (src.empty() || src.type() != CV_8UC3)
+    return -1;
+
+  cv::Mat temp(src.size(), CV_16SC3);
+  dst.create(src.size(), CV_16SC3);
+  dst.setTo(cv::Scalar(0, 0, 0));
+
+  // Horizontal smoothing: temp(r,c) = src(r,c-1) + 2*src(r,c) + src(r,c+1)
+  for (int r = 0; r < src.rows; r++) {
+    const cv::Vec3b* sp = src.ptr<cv::Vec3b>(r);
+    cv::Vec3s* tp = temp.ptr<cv::Vec3s>(r);
+
+    for (int c = 1; c < src.cols - 1; c++) {
+      for (int ch = 0; ch < 3; ch++) {
+        tp[c][ch] = (short)(sp[c - 1][ch] + 2 * sp[c][ch] + sp[c + 1][ch]); // max 1020
+      }
+    }
+  }
+
+  // Vertical derivative (positive up): dst(r,c) = temp(r-1,c) - temp(r+1,c)
+  for (int r = 1; r < src.rows - 1; r++) {
+    const cv::Vec3s* up = temp.ptr<cv::Vec3s>(r - 1);
+    const cv::Vec3s* dn = temp.ptr<cv::Vec3s>(r + 1);
+    cv::Vec3s* dp = dst.ptr<cv::Vec3s>(r);
+
+    for (int c = 1; c < src.cols - 1; c++) {
+      for (int ch = 0; ch < 3; ch++) {
+        dp[c][ch] = (short)(up[c][ch] - dn[c][ch]); // range [-2040,2040]
+      }
+    }
+  }
+
+  return 0;
+}

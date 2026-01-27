@@ -3,9 +3,12 @@
  * Name: Jaden Zhou
  * Date: Jan 2026
  * Purpose: Display live video feed with keypress features:
- *          - 'q' = quit
  *          - 'g' = OpenCV grayscale
  *          - 'h' = custom grayscale
+ *          - 'p' = sepia filter
+ *          - 'b' = 5x5 blur
+ *          - 'x' / 'y' = X Sobel / Y Sobel
+ *          - 'r' = reset filters
  *          - 's' = save
  *          - 'q' = quit
  */
@@ -16,7 +19,15 @@
 #include <cstdio> // standard io functions and allocation
 #include <ctime>
 
-enum DisplayMode { MODE_COLOR, MODE_OPENCV_GRAY, MODE_CUSTOM_GRAY, MODE_SEPIA, MODE_BLUR };
+enum DisplayMode {
+  MODE_COLOR,
+  MODE_OPENCV_GRAY,
+  MODE_CUSTOM_GRAY,
+  MODE_SEPIA,
+  MODE_BLUR,
+  MODE_SOBEL_X,
+  MODE_SOBEL_Y
+};
 
 int main(int argc, char* argv[]) {
 
@@ -37,6 +48,8 @@ int main(int argc, char* argv[]) {
   cv::Mat frame;
   cv::Mat gray1;
   cv::Mat display;
+  cv::Mat sx16, sy16;
+  cv::Mat vis8;
   DisplayMode mode = MODE_COLOR;
 
   for (;;) {
@@ -64,6 +77,20 @@ int main(int argc, char* argv[]) {
     } else if (mode == MODE_BLUR) {
       //   if (blur5x5_1(frame, display) != 0) {
       if (blur5x5_2(frame, display) != 0) {
+        display = frame;
+      }
+    } else if (mode == MODE_SOBEL_X) {
+      if (sobelX3x3(frame, sx16) == 0) {
+        cv::convertScaleAbs(sx16, vis8);
+        display = vis8;
+      } else {
+        display = frame;
+      }
+    } else if (mode == MODE_SOBEL_Y) {
+      if (sobelY3x3(frame, sy16) == 0) {
+        cv::convertScaleAbs(sy16, vis8);
+        display = vis8;
+      } else {
         display = frame;
       }
     }
@@ -95,6 +122,10 @@ int main(int argc, char* argv[]) {
       mode = MODE_SEPIA;
     } else if (key == 'b') { // 5x5 blur filter
       mode = MODE_BLUR;
+    } else if (key == 'x') { // 3x3 Sobel X
+      mode = MODE_SOBEL_X;
+    } else if (key == 'y') { // 3x3 Sobel Y
+      mode = MODE_SOBEL_Y;
     }
   }
 
