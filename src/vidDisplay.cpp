@@ -2,7 +2,7 @@
  * vidDisplay.cpp
  * Name: Jaden Zhou
  * Date: Jan 2026
- * Purpose: Display live video feed, quit on 'q', save frame on 's'
+ * Purpose: Display live video feed, quit on 'q', save frame on 's', toggle grayscale with 'g'
  */
 
 #include "opencv2/opencv.hpp" // general openCV header file
@@ -13,8 +13,9 @@
 /*
  * main
  * Opens the default camera and displays frames in a window.
- * - Press 'q' to quit
- * - Press 's' to save the current frame to ../out/
+ * - 'q' to quit
+ * - 's' to save the current frame to ../out/
+ * - 'g' toggles grayscale display
  */
 int main(int argc, char* argv[]) {
   cv::VideoCapture* capdev;
@@ -33,7 +34,12 @@ int main(int argc, char* argv[]) {
 
   const char* windowName = "Video";
   cv::namedWindow(windowName, 1); // identifies a window
+
   cv::Mat frame;
+  cv::Mat gray;
+  cv::Mat display;
+
+  bool grayscale = false; // store grayscale keypress choice
 
   for (;;) {
     *capdev >> frame; // get a new frame from the camera, treat as a stream
@@ -41,12 +47,26 @@ int main(int argc, char* argv[]) {
       printf("frame is empty\n");
       break;
     }
+
+    if (grayscale) {
+      // convert BGR -> Gray
+      cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
+      // convert Gray -> BGR so display is still 3-channel
+      cv::cvtColor(gray, display, cv::COLOR_GRAY2BGR);
+    } else {
+      display = frame;
+    }
+
     cv::imshow(windowName, frame);
 
     // see if there is a waiting keystroke
     char key = cv::waitKey(10);
     if (key == 'q') {
       break;
+    } else if (key == 'g') { // toggle grayscale
+      grayscale = true;
+    } else if (key == 'r') { // reset display
+      grayscale = false;
     } else if (key == 's') {
       // timestamped filename
       std::time_t t = std::time(nullptr);
