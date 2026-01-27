@@ -13,7 +13,8 @@
  *          - 'q' = quit
  */
 
-#include "filters.h"
+#include "faceDetect.h"
+#include "filters.h"          // face detector
 #include "opencv2/opencv.hpp" // general openCV header file
 
 #include <cstdio> // standard io functions and allocation
@@ -28,7 +29,8 @@ enum DisplayMode {
   MODE_SOBEL_X,
   MODE_SOBEL_Y,
   MODE_MAG,
-  MODE_BLUR_QUANT
+  MODE_BLUR_QUANT,
+  MODE_FACE
 };
 
 int main(int argc, char* argv[]) {
@@ -48,11 +50,13 @@ int main(int argc, char* argv[]) {
   cv::namedWindow(windowName, 1); // identifies a window
 
   cv::Mat frame;
-  cv::Mat gray1;
+  cv::Mat gray;
   cv::Mat display;
   cv::Mat sx16, sy16;
   cv::Mat vis8;
-  DisplayMode mode = MODE_COLOR;
+  std::vector<cv::Rect> faces;
+
+  DisplayMode mode = MODE_COLOR; // default mode
 
   for (;;) {
     capdev >> frame; // get a new frame from the camera, treat as a stream
@@ -65,9 +69,9 @@ int main(int argc, char* argv[]) {
       display = frame;
     } else if (mode == MODE_OPENCV_GRAY) {
       // convert BGR -> Gray
-      cv::cvtColor(frame, gray1, cv::COLOR_BGR2GRAY);
+      cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
       // convert Gray -> BGR so display is still 3-channel
-      cv::cvtColor(gray1, display, cv::COLOR_GRAY2BGR);
+      cv::cvtColor(gray, display, cv::COLOR_GRAY2BGR);
     } else if (mode == MODE_CUSTOM_GRAY) {
       if (grayscale(frame, display) != 0) {
         display = frame;
@@ -105,6 +109,13 @@ int main(int argc, char* argv[]) {
       if (blurQuantize(frame, display, 10) != 0) {
         display = frame;
       }
+    } else if (mode == MODE_FACE) {
+
+      display = frame.clone(); // draw on a copy
+
+      cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
+      detectFaces(gray, faces);
+      drawBoxes(display, faces, 30, 1.0);
     }
 
     cv::imshow(windowName, display);
@@ -142,6 +153,8 @@ int main(int argc, char* argv[]) {
       mode = MODE_MAG;
     } else if (key == 'l') { // blur and quantize
       mode = MODE_BLUR_QUANT;
+    } else if (key == 'f') { // face detection
+      mode = MODE_FACE;
     }
   }
 

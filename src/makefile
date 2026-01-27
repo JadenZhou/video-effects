@@ -19,7 +19,7 @@ LDLIBS = $(shell pkg-config --libs opencv4)
 .PHONY: all clean
 
 
-all: img vid
+all: img vid time
 
 
 %.o: %.cpp
@@ -31,7 +31,7 @@ img: imgDisplay.o
 	$(CXX) $^ -o $(BINDIR)/$@ $(LDLIBS)
 
 
-vid: vidDisplay.o filters.o
+vid: vidDisplay.o filters.o faceDetect.o
 	mkdir -p $(BINDIR)
 	$(CXX) $^ -o $(BINDIR)/$@ $(LDLIBS)
 
@@ -42,4 +42,4 @@ time: timeBlur.o filters.o
 
 clean:
 	rm -f *.o *~
-	rm -f $(BINDIR)/img $(BINDIR)/vid
+	rm -f $(BINDIR)/img $(BINDIR)/vid $(BINDIR)/time
