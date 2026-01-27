@@ -27,7 +27,8 @@ enum DisplayMode {
   MODE_BLUR,
   MODE_SOBEL_X,
   MODE_SOBEL_Y,
-  MODE_MAG
+  MODE_MAG,
+  MODE_BLUR_QUANT
 };
 
 int main(int argc, char* argv[]) {
@@ -100,6 +101,10 @@ int main(int argc, char* argv[]) {
       } else {
         display = frame;
       }
+    } else if (mode == MODE_BLUR_QUANT) {
+      if (blurQuantize(frame, display, 10) != 0) {
+        display = frame;
+      }
     }
 
     cv::imshow(windowName, display);
@@ -135,6 +140,8 @@ int main(int argc, char* argv[]) {
       mode = MODE_SOBEL_Y;
     } else if (key == 'm') { // Gradient Magnitude
       mode = MODE_MAG;
+    } else if (key == 'l') { // blur and quantize
+      mode = MODE_BLUR_QUANT;
     }
   }
 

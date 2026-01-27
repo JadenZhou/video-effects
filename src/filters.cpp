@@ -331,3 +331,50 @@ int magnitude(cv::Mat& sx, cv::Mat& sy, cv::Mat& dst) {
 
   return 0;
 }
+
+/*
+ * blurQuantize
+ * Blurs the image, then quantizes each color channel into 'levels' buckets.
+ * Uses blur5x5_2 for the blur step.
+ * Arguments:
+ *  - src: input BGR image (CV_8UC3)
+ *  - dst: output BGR image (CV_8UC3)
+ *  - levels: number of quantization levels per channel (e.g., 10)
+ * Returns:
+ *  - 0 on success, -1 on error
+ */
+int blurQuantize(cv::Mat& src, cv::Mat& dst, int levels) {
+
+  if (src.empty() || src.type() != CV_8UC3)
+    return -1;
+  if (levels <= 0)
+    return -1;
+
+  cv::Mat blurred;
+  if (blur5x5_2(src, blurred) != 0)
+    return -1;
+
+  dst.create(src.size(), src.type());
+
+  int b = 255 / levels;
+  if (b < 1)
+    b = 1; // avoid divide-by-zero if levels > 255
+
+  for (int r = 0; r < blurred.rows; r++) {
+    const cv::Vec3b* sp = blurred.ptr<cv::Vec3b>(r);
+    cv::Vec3b* dp = dst.ptr<cv::Vec3b>(r);
+
+    for (int c = 0; c < blurred.cols; c++) {
+      for (int ch = 0; ch < 3; ch++) {
+        int x = sp[c][ch];
+        int xt = x / b;
+        int xf = xt * b;
+        if (xf > 255)
+          xf = 255;
+        dp[c][ch] = (unsigned char)xf;
+      }
+    }
+  }
+
+  return 0;
+}

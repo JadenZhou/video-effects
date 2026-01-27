@@ -31,4 +31,7 @@ int sobelY3x3(cv::Mat& src, cv::Mat& dst);
 // Gradient magnitude with Euclidean distance
 int magnitude(cv::Mat& sx, cv::Mat& sy, cv::Mat& dst);
 
+// Blurs and quantizes image to fixed number of levels
+int blurQuantize(cv::Mat& src, cv::Mat& dst, int levels);
+
 #endif
