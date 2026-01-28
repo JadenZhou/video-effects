@@ -5,6 +5,7 @@
 # directories
 bin/
 data/
+out/
 
 # executables
 **.o
