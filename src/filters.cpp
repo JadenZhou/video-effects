@@ -378,3 +378,39 @@ int blurQuantize(cv::Mat& src, cv::Mat& dst, int levels) {
 
   return 0;
 }
+
+/*
+ * depthFog
+ * Adds fog based on depth values (0..255). Higher depth => more fog.
+ * src: CV_8UC3, depth8: CV_8UC1, dst: CV_8UC3
+ */
+int depthFog(cv::Mat& src, cv::Mat& depth8, cv::Mat& dst) {
+  if (src.empty() || depth8.empty())
+    return -1;
+  if (src.type() != CV_8UC3 || depth8.type() != CV_8UC1)
+    return -1;
+  if (src.size() != depth8.size())
+    return -1;
+
+  dst.create(src.size(), src.type());
+
+  // Fog color (light gray)
+  const float fogB = 220.0f, fogG = 220.0f, fogR = 220.0f;
+
+  for (int r = 0; r < src.rows; r++) {
+    const cv::Vec3b* sp = src.ptr<cv::Vec3b>(r);
+    const unsigned char* zp = depth8.ptr<unsigned char>(r);
+    cv::Vec3b* dp = dst.ptr<cv::Vec3b>(r);
+
+    for (int c = 0; c < src.cols; c++) {
+      float a = 1.0f - (zp[c] / 255.0f); // 0 near -> 1 far
+      a = a * a;                         // stronger fog
+
+      dp[c][0] = (unsigned char)((1.0f - a) * sp[c][0] + a * fogB);
+      dp[c][1] = (unsigned char)((1.0f - a) * sp[c][1] + a * fogG);
+      dp[c][2] = (unsigned char)((1.0f - a) * sp[c][2] + a * fogR);
+    }
+  }
+
+  return 0;
+}

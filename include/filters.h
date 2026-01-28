@@ -34,4 +34,7 @@ int magnitude(cv::Mat& sx, cv::Mat& sy, cv::Mat& dst);
 // Blurs and quantizes image to fixed number of levels
 int blurQuantize(cv::Mat& src, cv::Mat& dst, int levels);
 
+// Adds fog based on depth values
+int depthFog(cv::Mat& src, cv::Mat& depth8, cv::Mat& dst);
+
 #endif

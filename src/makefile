@@ -9,11 +9,15 @@ CXX = clang++
 BINDIR = ../bin
 INCDIR = ../include
 
-# Flags
-CXXFLAGS = -std=c++17 -I$(INCDIR) $(shell pkg-config --cflags opencv4)
-
 # Libraries
 LDLIBS = $(shell pkg-config --libs opencv4)
+
+# ONNX Runtime (Homebrew)
+ONNX_INC = -I/opt/homebrew/opt/onnxruntime/include
+ONNX_LIB = -L/opt/homebrew/opt/onnxruntime/lib -lonnxruntime
+
+# Flags
+CXXFLAGS = -std=c++17 -I$(INCDIR) $(shell pkg-config --cflags opencv4) $(ONNX_INC)
 
 
 .PHONY: all clean
@@ -33,11 +37,20 @@ img: imgDisplay.o
 
 vid: vidDisplay.o filters.o faceDetect.o
 	mkdir -p $(BINDIR)
-	$(CXX) $^ -o $(BINDIR)/$@ $(LDLIBS)
+	$(CXX) $^ -o $(BINDIR)/$@ $(LDLIBS) $(ONNX_LIB)
+
 
 time: timeBlur.o filters.o
 	mkdir -p $(BINDIR)
 	$(CXX) $^ -o $(BINDIR)/$@ $(LDLIBS)
+
+da2-img: da2-example.o
+	mkdir -p $(BINDIR)
+	$(CXX) $^ -o $(BINDIR)/$@ $(LDLIBS) $(ONNX_LIB)
+
+da2-vid: da2-video.o
+	mkdir -p $(BINDIR)
+	$(CXX) $^ -o $(BINDIR)/$@ $(LDLIBS) $(ONNX_LIB)
 
 
 clean:

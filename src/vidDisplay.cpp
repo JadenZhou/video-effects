@@ -13,6 +13,7 @@
  *          - 'q' = quit
  */
 
+#include "DA2Network.hpp"
 #include "faceDetect.h"
 #include "filters.h"          // face detector
 #include "opencv2/opencv.hpp" // general openCV header file
@@ -30,7 +31,9 @@ enum DisplayMode {
   MODE_SOBEL_Y,
   MODE_MAG,
   MODE_BLUR_QUANT,
-  MODE_FACE
+  MODE_FACE,
+  MODE_DEPTH,
+  MODE_DEPTH_FOG
 };
 
 int main(int argc, char* argv[]) {
@@ -56,13 +59,44 @@ int main(int argc, char* argv[]) {
   cv::Mat vis8;
   std::vector<cv::Rect> faces;
 
-  DisplayMode mode = MODE_COLOR; // default mode
+  // depth
+  const float reduction = 0.5f;
+  DA2Network da_net("../data/model_fp16.onnx");
+
+  float scale_factor = 256.0f / (refS.height * reduction);
+  printf("Using DA2 scale factor %.2f\n", scale_factor);
+
+  cv::Mat depth8;    // CV_8UC1
+  cv::Mat depth_vis; // CV_8UC3
+  cv::Mat small;     // reduced frame (CV_8UC3)
+
+  // default mode
+  DisplayMode mode = MODE_COLOR;
 
   for (;;) {
     capdev >> frame; // get a new frame from the camera, treat as a stream
     if (frame.empty()) {
       printf("frame is empty\n");
       break;
+    }
+
+    bool needDepth = (mode == MODE_DEPTH || mode == MODE_DEPTH_FOG);
+
+    if (needDepth) {
+      // reduce input frame for speed (matches sample)
+      cv::resize(frame, small, cv::Size(), reduction, reduction);
+
+      da_net.set_input(small, scale_factor);
+      da_net.run_network(depth8, small.size()); // depth8: CV_8UC1
+
+      if (mode == MODE_DEPTH) {
+        cv::applyColorMap(depth8, depth_vis, cv::COLORMAP_INFERNO);
+        display = depth_vis; // note: display size is reduced
+      } else {               // MODE_DEPTH_FOG
+        if (depthFog(small, depth8, display) != 0) {
+          display = small;
+        }
+      }
     }
 
     if (mode == MODE_COLOR) {
@@ -155,6 +189,10 @@ int main(int argc, char* argv[]) {
       mode = MODE_BLUR_QUANT;
     } else if (key == 'f') { // face detection
       mode = MODE_FACE;
+    } else if (key == 'd') { // depth
+      mode = MODE_DEPTH;
+    } else if (key == 'o') { // depth fog
+      mode = MODE_DEPTH_FOG;
     }
   }
 
