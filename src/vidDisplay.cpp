@@ -35,7 +35,8 @@ enum DisplayMode {
   MODE_DEPTH,
   MODE_DEPTH_FOG,
   MODE_NEG,
-  MODE_EMBOSS
+  MODE_EMBOSS,
+  MODE_FACE_PIXELATE
 };
 
 int main(int argc, char* argv[]) {
@@ -99,6 +100,8 @@ int main(int argc, char* argv[]) {
           display = small;
         }
       }
+      cv::imshow(windowName, display);
+      continue;
     }
 
     if (mode == MODE_COLOR) {
@@ -160,6 +163,43 @@ int main(int argc, char* argv[]) {
       if (emboss(frame, display) != 0) {
         display = frame;
       }
+    } else if (mode == MODE_FACE_PIXELATE) {
+
+      display = frame.clone();
+
+      // Detect faces
+      cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
+      detectFaces(gray, faces);
+
+      // Pixelation strength: bigger value => more pixelated
+      const int pixelFactor = 10;
+
+      for (const auto& f : faces) {
+
+        // Clamp face rectangle to image bounds
+        cv::Rect r = f & cv::Rect(0, 0, frame.cols, frame.rows);
+        if (r.width <= 0 || r.height <= 0)
+          continue;
+
+        // Extract face ROI from the display image (so we only modify the displayed output)
+        cv::Mat roi = display(r);
+
+        // Compute small size (at least 1x1)
+        int wSmall = r.width / pixelFactor;
+        int hSmall = r.height / pixelFactor;
+        if (wSmall < 1)
+          wSmall = 1;
+        if (hSmall < 1)
+          hSmall = 1;
+
+        cv::Mat small;
+
+        // Downsample the ROI (area-based)
+        cv::resize(roi, small, cv::Size(wSmall, hSmall), 0, 0, cv::INTER_AREA);
+
+        // Upsample back to original ROI size using nearest-neighbor to keep blocky pixels
+        cv::resize(small, roi, roi.size(), 0, 0, cv::INTER_NEAREST);
+      }
     }
 
     cv::imshow(windowName, display);
@@ -207,6 +247,8 @@ int main(int argc, char* argv[]) {
       mode = MODE_NEG;
     } else if (key == 'e') { // emboss
       mode = MODE_EMBOSS;
+    } else if (key == 'u') { // pixelate face
+      mode = MODE_FACE_PIXELATE;
     }
   }
 
