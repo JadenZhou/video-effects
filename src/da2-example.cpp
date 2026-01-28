@@ -27,7 +27,8 @@ int main(int argc, char* argv[]) {
     printf("Usage %s <image filename>\n", argv[0]);
     exit(-1);
   }
-  strcpy(filename, argv[1]); // copying 2nd command line argument to filename variable
+  strcpy(filename, "../data/");
+  strcat(filename, argv[1]); // copying 2nd command line argument to filename variable
 
   // read the image, assuming 3-channel BGR
   src = cv::imread(filename);
@@ -40,7 +41,7 @@ int main(int argc, char* argv[]) {
 
   // make a DANetwork object, if you use a different network, you have
   // to include the input and output layer names
-  DA2Network da_net("model_fp16.onnx");
+  DA2Network da_net("../data/model_fp16.onnx");
 
   // scale the network input so it's not larger than 512 on the small side
   float scale_factor = 512.0 / (src.rows > src.cols ? src.cols : src.rows);

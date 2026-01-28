@@ -32,7 +32,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
-#include <onnxruntime_cxx_api.h>
+#include <onnxruntime/onnxruntime_cxx_api.h>
 #include <opencv2/opencv.hpp>
 
 class DA2Network {
