@@ -3,14 +3,23 @@
  * Name: Jaden Zhou
  * Date: Jan 2026
  * Purpose: Display live video feed with keypress features:
- *          - 'g' = OpenCV grayscale
- *          - 'h' = custom grayscale
- *          - 'p' = sepia filter
- *          - 'b' = 5x5 blur
- *          - 'x' / 'y' = X Sobel / Y Sobel
- *          - 'r' = reset filters
- *          - 's' = save
- *          - 'q' = quit
+ * - 'g' = OpenCV grayscale
+ * - 'h' = custom grayscale
+ * - 'p' = sepia filter
+ * - 'b' = 5x5 blur
+ * - 'x' = X Sobel
+ * - 'y' = Y Sobel
+ * - 'm' = Gradient magnitude
+ * - 'l' = blur quantize
+ * - 'f' = face detection
+ * - 'd' = depth
+ * - 'o' = depth fog
+ * - 'n' = negative
+ * - 'e' = emboss
+ * - 'u' = pixelate
+ * - 'r' = reset filters
+ * - 's' = save
+ * - 'q' = quit
  */
 
 #include "DA2Network.hpp"

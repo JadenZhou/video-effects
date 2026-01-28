@@ -2,15 +2,13 @@
  * imgDisplay.cpp
  * Name: Jaden Zhou
  * Date: Jan 2026
- * Purpose: Read an image from a file and display it until user quits ('q')
+ * Purpose: Read an image from a file and display it until user quits 'q'
  */
 
 #include "opencv2/opencv.hpp" // general openCV header file
 
 #include <cstdio>  // standard io functions and allocation
 #include <cstring> // string functions
-
-// cv:: is the namespace for OpenCV
 
 int main(int argc, char* argv[]) {
   cv::Mat src;
