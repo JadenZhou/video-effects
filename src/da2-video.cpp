@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
   const float reduction = 0.5;
 
   // make a DANetwork object
-  DA2Network da_net("model_fp16.onnx");
+  DA2Network da_net("../data/model_fp16.onnx");
 
   // open the video device
   capdev = new cv::VideoCapture(0);
