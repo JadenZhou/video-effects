@@ -34,7 +34,8 @@ enum DisplayMode {
   MODE_FACE,
   MODE_DEPTH,
   MODE_DEPTH_FOG,
-  MODE_NEG
+  MODE_NEG,
+  MODE_EMBOSS
 };
 
 int main(int argc, char* argv[]) {
@@ -155,6 +156,10 @@ int main(int argc, char* argv[]) {
       if (negative(frame, display) != 0) {
         display = frame;
       }
+    } else if (mode == MODE_EMBOSS) {
+      if (emboss(frame, display) != 0) {
+        display = frame;
+      }
     }
 
     cv::imshow(windowName, display);
@@ -200,6 +205,8 @@ int main(int argc, char* argv[]) {
       mode = MODE_DEPTH_FOG;
     } else if (key == 'n') { // negative
       mode = MODE_NEG;
+    } else if (key == 'e') { // emboss
+      mode = MODE_EMBOSS;
     }
   }
 

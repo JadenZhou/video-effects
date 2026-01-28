@@ -37,7 +37,10 @@ int blurQuantize(cv::Mat& src, cv::Mat& dst, int levels);
 // Adds fog based on depth values
 int depthFog(cv::Mat& src, cv::Mat& depth8, cv::Mat& dst);
 
-// Inverts colors
+// Pixel-wise negative image
 int negative(cv::Mat& src, cv::Mat& dst);
+
+// Emboss effect using Sobel X and Y
+int emboss(cv::Mat& src, cv::Mat& dst);
 
 #endif

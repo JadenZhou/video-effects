@@ -436,7 +436,7 @@ int depthFog(cv::Mat& src, cv::Mat& depth8, cv::Mat& dst) {
 
 /**
  * negative
- * Negates / inverts color channels
+ * Produces a negative of the input image by inverting each color channel.
  * Arguments:
  *  - src: input BGR image (CV_8UC3)
  *  - dst: output BGR image (CV_8UC3)
@@ -457,5 +457,59 @@ int negative(cv::Mat& src, cv::Mat& dst) {
       dp[c][2] = 255 - sp[c][2];
     }
   }
+  return 0;
+}
+
+/*
+ * emboss
+ * Creates an embossing effect by combining Sobel X and Sobel Y responses.
+ * Uses a directional dot product and adds a bias so the result is visible.
+ * Arguments:
+ * - src: input BGR image (CV_8UC3)
+ * - dst: output embossed image (CV_8UC3)
+ * Returns:
+ * - 0 on success, -1 on error
+ */
+int emboss(cv::Mat& src, cv::Mat& dst) {
+
+  if (src.empty() || src.type() != CV_8UC3) {
+    return -1;
+  }
+
+  cv::Mat sx, sy;
+
+  // Compute Sobel gradients
+  sobelX3x3(src, sx);
+  sobelY3x3(src, sy);
+
+  dst.create(src.size(), CV_8UC3);
+
+  // Direction vector for embossing (diagonal light)
+  const float dx = 0.7071f;
+  const float dy = 0.7071f;
+
+  for (int r = 0; r < src.rows; r++) {
+    const cv::Vec3s* xptr = sx.ptr<cv::Vec3s>(r);
+    const cv::Vec3s* yptr = sy.ptr<cv::Vec3s>(r);
+    cv::Vec3b* dp = dst.ptr<cv::Vec3b>(r);
+
+    for (int c = 0; c < src.cols; c++) {
+      for (int ch = 0; ch < 3; ch++) {
+
+        // Dot product of gradient with direction
+        float v = dx * xptr[c][ch] + dy * yptr[c][ch];
+
+        // Scale and bias into visible range
+        int out = (int)(v / 8.0f + 128.0f);
+        if (out < 0)
+          out = 0;
+        if (out > 255)
+          out = 255;
+
+        dp[c][ch] = (unsigned char)out;
+      }
+    }
+  }
+
   return 0;
 }
