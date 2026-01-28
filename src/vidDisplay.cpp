@@ -33,7 +33,8 @@ enum DisplayMode {
   MODE_BLUR_QUANT,
   MODE_FACE,
   MODE_DEPTH,
-  MODE_DEPTH_FOG
+  MODE_DEPTH_FOG,
+  MODE_NEG
 };
 
 int main(int argc, char* argv[]) {
@@ -150,6 +151,10 @@ int main(int argc, char* argv[]) {
       cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
       detectFaces(gray, faces);
       drawBoxes(display, faces, 30, 1.0);
+    } else if (mode == MODE_NEG) {
+      if (negative(frame, display) != 0) {
+        display = frame;
+      }
     }
 
     cv::imshow(windowName, display);
@@ -193,6 +198,8 @@ int main(int argc, char* argv[]) {
       mode = MODE_DEPTH;
     } else if (key == 'o') { // depth fog
       mode = MODE_DEPTH_FOG;
+    } else if (key == 'n') { // negative
+      mode = MODE_NEG;
     }
   }
 

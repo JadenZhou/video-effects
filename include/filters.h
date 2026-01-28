@@ -37,4 +37,7 @@ int blurQuantize(cv::Mat& src, cv::Mat& dst, int levels);
 // Adds fog based on depth values
 int depthFog(cv::Mat& src, cv::Mat& depth8, cv::Mat& dst);
 
+// Inverts colors
+int negative(cv::Mat& src, cv::Mat& dst);
+
 #endif

@@ -103,9 +103,11 @@ int sepia(cv::Mat& src, cv::Mat& dst) {
 /*
  * blur5x5_1
  * Naive 5x5 blur using the full 5x5 kernel (sum=100).
- * - src: CV_8UC3
- * - dst: CV_8UC3
- * Border handling: copy src to dst, overwrite interior only.
+ * Arguments:
+ *  - src: input BGR image (CV_8UC3)
+ *  - dst: output BGR image (CV_8UC3)
+ * Returns:
+ *  - 0 on success, -1 on error
  */
 int blur5x5_1(cv::Mat& src, cv::Mat& dst) {
 
@@ -146,7 +148,11 @@ int blur5x5_1(cv::Mat& src, cv::Mat& dst) {
  * blur5x5_2
  * Faster 5x5 blur using separable 1x5 filters and pointer access.
  * Uses temp CV_16SC3 to keep precision.
- * Border handling: copy src to dst, overwrite interior only.
+ * Arguments:
+ *  - src: input BGR image (CV_8UC3)
+ *  - dst: output BGR image (CV_8UC3)
+ * Returns:
+ *  - 0 on success, -1 on error
  */
 int blur5x5_2(cv::Mat& src, cv::Mat& dst) {
 
@@ -206,7 +212,11 @@ int blur5x5_2(cv::Mat& src, cv::Mat& dst) {
  * sobelX3x3
  * Computes Sobel X (positive right) using separable filters:
  *  vertical [1 2 1]^T then horizontal [-1 0 1]
- * Output is CV_16SC3.
+ * Arguments:
+ *  - src: input BGR image (CV_8UC3)
+ *  - dst: output BGR image (CV_16SC3)
+ * Returns:
+ *  - 0 on success, -1 on error
  */
 int sobelX3x3(cv::Mat& src, cv::Mat& dst) {
 
@@ -250,7 +260,11 @@ int sobelX3x3(cv::Mat& src, cv::Mat& dst) {
  * sobelY3x3
  * Computes Sobel Y (positive up) using separable filters:
  *  horizontal [1 2 1] then vertical [1 0 -1]^T  (up - down)
- * Output is CV_16SC3.
+ * Arguments:
+ *  - src: input BGR image (CV_8UC3)
+ *  - dst: output BGR image (CV_16SC3)
+ * Returns:
+ *  - 0 on success, -1 on error
  */
 int sobelY3x3(cv::Mat& src, cv::Mat& dst) {
 
@@ -382,7 +396,12 @@ int blurQuantize(cv::Mat& src, cv::Mat& dst, int levels) {
 /*
  * depthFog
  * Adds fog based on depth values (0..255). Higher depth => more fog.
- * src: CV_8UC3, depth8: CV_8UC1, dst: CV_8UC3
+ * Arguments:
+ * - src: input BGR image (CV_8UC3)
+ * - depth8: TODO (CV_8UC1)
+ * - dst: output BGR image (CV_8UC3)
+ * Returns:
+ *  - 0 on success, -1 on error
  */
 int depthFog(cv::Mat& src, cv::Mat& depth8, cv::Mat& dst) {
   if (src.empty() || depth8.empty())
@@ -412,5 +431,31 @@ int depthFog(cv::Mat& src, cv::Mat& depth8, cv::Mat& dst) {
     }
   }
 
+  return 0;
+}
+
+/**
+ * negative
+ * Negates / inverts color channels
+ * Arguments:
+ *  - src: input BGR image (CV_8UC3)
+ *  - dst: output BGR image (CV_8UC3)
+ * Returns:
+ *  - 0 on success, -1 on error
+ */
+int negative(cv::Mat& src, cv::Mat& dst) {
+  if (src.empty() || src.type() != CV_8UC3)
+    return -1;
+  dst.create(src.size(), src.type());
+
+  for (int r = 0; r < src.rows; r++) {
+    const cv::Vec3b* sp = src.ptr<cv::Vec3b>(r);
+    cv::Vec3b* dp = dst.ptr<cv::Vec3b>(r);
+    for (int c = 0; c < src.cols; c++) {
+      dp[c][0] = 255 - sp[c][0];
+      dp[c][1] = 255 - sp[c][1];
+      dp[c][2] = 255 - sp[c][2];
+    }
+  }
   return 0;
 }
