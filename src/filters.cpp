@@ -513,3 +513,73 @@ int emboss(cv::Mat& src, cv::Mat& dst) {
 
   return 0;
 }
+
+/*
+ * sepiaVignette
+ * Applies a sepia tone filter with an added vignetting effect.
+ * The sepia tone is computed using the original BGR values,
+ * and vignetting darkens pixels as a function of distance from
+ * the image center to mimic antique camera lens shading.
+ *
+ * Arguments:
+ * - src: input image (CV_8UC3, BGR color)
+ * - dst: output image (CV_8UC3, sepia + vignette)
+ *
+ * Returns:
+ * - 0 on success, -1 on error
+ */
+int sepiaVignette(cv::Mat& src, cv::Mat& dst) {
+  if (src.empty() || src.type() != CV_8UC3)
+    return -1;
+
+  dst.create(src.size(), src.type());
+
+  float cx = (src.cols - 1) / 2.0f;
+  float cy = (src.rows - 1) / 2.0f;
+  float maxDist = std::sqrt(cx * cx + cy * cy);
+
+  for (int r = 0; r < src.rows; r++) {
+    const cv::Vec3b* sp = src.ptr<cv::Vec3b>(r);
+    cv::Vec3b* dp = dst.ptr<cv::Vec3b>(r);
+
+    for (int c = 0; c < src.cols; c++) {
+      // original BGR
+      unsigned char B = sp[c][0];
+      unsigned char G = sp[c][1];
+      unsigned char R = sp[c][2];
+
+      // sepia from ORIGINAL channels
+      int newB = (int)(0.272 * R + 0.534 * G + 0.131 * B);
+      int newG = (int)(0.349 * R + 0.686 * G + 0.168 * B);
+      int newR = (int)(0.393 * R + 0.769 * G + 0.189 * B);
+
+      if (newB > 255)
+        newB = 255;
+      if (newG > 255)
+        newG = 255;
+      if (newR > 255)
+        newR = 255;
+
+      // vignette factor: 1 at center -> ~minFactor at corners
+      float dx = c - cx;
+      float dy = r - cy;
+      float d = std::sqrt(dx * dx + dy * dy) / maxDist; // 0..1
+
+      // Smooth curve; tweak these two constants for stronger/weaker vignette
+      const float minFactor = 0.35f; // edge darkness (0.0 darker, 1.0 none)
+      float t = d * d;               // quadratic falloff
+      float factor = 1.0f - t * (1.0f - minFactor);
+
+      // apply vignette to sepia result
+      newB = (int)(newB * factor);
+      newG = (int)(newG * factor);
+      newR = (int)(newR * factor);
+
+      dp[c][0] = (unsigned char)newB;
+      dp[c][1] = (unsigned char)newG;
+      dp[c][2] = (unsigned char)newR;
+    }
+  }
+
+  return 0;
+}

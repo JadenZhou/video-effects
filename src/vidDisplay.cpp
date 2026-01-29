@@ -45,7 +45,8 @@ enum DisplayMode {
   MODE_DEPTH_FOG,
   MODE_NEG,
   MODE_EMBOSS,
-  MODE_FACE_PIXELATE
+  MODE_FACE_PIXELATE,
+  MODE_SEPIA_VIGNETTE
 };
 
 int main(int argc, char* argv[]) {
@@ -207,6 +208,10 @@ int main(int argc, char* argv[]) {
         // Upsample back to original ROI size using nearest-neighbor to keep blocky pixels
         cv::resize(small, roi, roi.size(), 0, 0, cv::INTER_NEAREST);
       }
+    } else if (mode == MODE_SEPIA_VIGNETTE) {
+      if (sepiaVignette(frame, display) != 0) {
+        display = frame;
+      }
     }
 
     cv::imshow(windowName, display);
@@ -256,6 +261,8 @@ int main(int argc, char* argv[]) {
       mode = MODE_EMBOSS;
     } else if (key == 'u') { // pixelate face
       mode = MODE_FACE_PIXELATE;
+    } else if (key == 'v') { // sepia vignette
+      mode = MODE_SEPIA_VIGNETTE;
     }
   }
 
