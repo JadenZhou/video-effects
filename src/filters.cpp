@@ -565,9 +565,9 @@ int sepiaVignette(cv::Mat& src, cv::Mat& dst) {
       float dy = r - cy;
       float d = std::sqrt(dx * dx + dy * dy) / maxDist; // 0..1
 
-      // Smooth curve; tweak these two constants for stronger/weaker vignette
+      // Smooth curve
       const float minFactor = 0.35f; // edge darkness (0.0 darker, 1.0 none)
-      float t = d * d;               // quadratic falloff
+      float t = d * d * d;           // falloff
       float factor = 1.0f - t * (1.0f - minFactor);
 
       // apply vignette to sepia result
