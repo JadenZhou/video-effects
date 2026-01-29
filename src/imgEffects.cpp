@@ -86,6 +86,8 @@ static const char* modeName(Mode m) {
     return "depthfog";
   case MODE_FACE_PIXELATE:
     return "pixelate";
+  case MODE_SEPIA_VIGNETTE:
+    return "vignette";
   default:
     return "out";
   }
