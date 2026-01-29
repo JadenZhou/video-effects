@@ -23,7 +23,7 @@ CXXFLAGS = -std=c++17 -I$(INCDIR) $(shell pkg-config --cflags opencv4) $(ONNX_IN
 .PHONY: all clean
 
 
-all: img vid time img-effects
+all: img vid img-effects
 
 
 %.o: %.cpp
