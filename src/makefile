@@ -23,7 +23,7 @@ CXXFLAGS = -std=c++17 -I$(INCDIR) $(shell pkg-config --cflags opencv4) $(ONNX_IN
 .PHONY: all clean
 
 
-all: img vid time
+all: img vid time img-effects
 
 
 %.o: %.cpp
@@ -43,6 +43,10 @@ vid: vidDisplay.o filters.o faceDetect.o
 time: timeBlur.o filters.o
 	mkdir -p $(BINDIR)
 	$(CXX) $^ -o $(BINDIR)/$@ $(LDLIBS)
+
+img-effects: imgEffects.o filters.o faceDetect.o
+	mkdir -p $(BINDIR)
+	$(CXX) $^ -o $(BINDIR)/$@ $(LDLIBS) $(ONNX_LIB)
 
 da2-img: da2-example.o
 	mkdir -p $(BINDIR)
