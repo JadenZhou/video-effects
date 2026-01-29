@@ -20,6 +20,7 @@
  * - 'e' = emboss
  * - 'u' = pixelate
  * - 'v' = sepia vignette
+ * - 'c' = edge heatmap
  * - 'r' = reset filters
  * - 's' = save
  * - 'q' = quit
@@ -51,7 +52,8 @@ enum Mode {
   MODE_NEG,
   MODE_EMBOSS,
   MODE_FACE_PIXELATE,
-  MODE_SEPIA_VIGNETTE
+  MODE_SEPIA_VIGNETTE,
+  MODE_EDGE_HEATMAP
 };
 
 static const char* modeName(Mode m) {
@@ -88,6 +90,8 @@ static const char* modeName(Mode m) {
     return "pixelate";
   case MODE_SEPIA_VIGNETTE:
     return "vignette";
+  case MODE_EDGE_HEATMAP:
+    return "edgeheatmap";
   default:
     return "out";
   }
@@ -115,7 +119,7 @@ int main(int argc, char* argv[]) {
   Mode mode = MODE_COLOR;
 
   // scratch mats
-  cv::Mat gray1, display, sx16, sy16, vis8;
+  cv::Mat gray1, display, sx16, sy16, vis8, mag8, mag1;
   std::vector<cv::Rect> faces;
 
   // Depth
@@ -234,6 +238,12 @@ int main(int argc, char* argv[]) {
     } else if (mode == MODE_SEPIA_VIGNETTE) {
       if (sepiaVignette(src, display) != 0)
         display = src.clone();
+    } else if (mode == MODE_EDGE_HEATMAP) {
+      if (sobelX3x3(src, sx16) == 0 && sobelY3x3(src, sy16) == 0 &&
+          magnitude(sx16, sy16, mag8) == 0) {
+        cv::cvtColor(mag8, mag1, cv::COLOR_BGR2GRAY);
+        cv::applyColorMap(mag1, display, cv::COLORMAP_TURBO);
+      }
     } else {
       display = src.clone();
     }
@@ -276,6 +286,8 @@ int main(int argc, char* argv[]) {
       mode = MODE_FACE_PIXELATE;
     } else if (key == 'v') { // sepia vignette
       mode = MODE_SEPIA_VIGNETTE;
+    } else if (key == 'c') { // edge heatmap
+      mode = MODE_EDGE_HEATMAP;
     } else if (key == 's') { // save
       std::time_t t = std::time(nullptr);
       char outname[256];

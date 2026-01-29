@@ -17,6 +17,8 @@
  * - 'n' = negative
  * - 'e' = emboss
  * - 'u' = pixelate
+ * - 'v' = sepia vignette
+ * - 'c' = edge heatmap
  * - 'r' = reset filters
  * - 's' = save
  * - 'q' = quit
@@ -46,7 +48,8 @@ enum DisplayMode {
   MODE_NEG,
   MODE_EMBOSS,
   MODE_FACE_PIXELATE,
-  MODE_SEPIA_VIGNETTE
+  MODE_SEPIA_VIGNETTE,
+  MODE_EDGE_HEATMAP
 };
 
 int main(int argc, char* argv[]) {
@@ -70,6 +73,7 @@ int main(int argc, char* argv[]) {
   cv::Mat display;
   cv::Mat sx16, sy16;
   cv::Mat vis8;
+  cv::Mat mag8, mag1;
   std::vector<cv::Rect> faces;
 
   // depth
@@ -212,6 +216,12 @@ int main(int argc, char* argv[]) {
       if (sepiaVignette(frame, display) != 0) {
         display = frame;
       }
+    } else if (mode == MODE_EDGE_HEATMAP) {
+      if (sobelX3x3(frame, sx16) == 0 && sobelY3x3(frame, sy16) == 0 &&
+          magnitude(sx16, sy16, mag8) == 0) {
+        cv::cvtColor(mag8, mag1, cv::COLOR_BGR2GRAY);
+        cv::applyColorMap(mag1, display, cv::COLORMAP_TURBO);
+      }
     }
 
     cv::imshow(windowName, display);
@@ -263,6 +273,8 @@ int main(int argc, char* argv[]) {
       mode = MODE_FACE_PIXELATE;
     } else if (key == 'v') { // sepia vignette
       mode = MODE_SEPIA_VIGNETTE;
+    } else if (key == 'c') { // edge heatmap
+      mode = MODE_EDGE_HEATMAP;
     }
   }
 
