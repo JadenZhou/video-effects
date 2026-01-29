@@ -103,14 +103,12 @@ int main(int argc, char* argv[]) {
 
       if (mode == MODE_DEPTH) {
         cv::applyColorMap(depth8, depth_vis, cv::COLORMAP_INFERNO);
-        display = depth_vis; // note: display size is reduced
+        display = depth_vis; // display size is reduced
       } else {               // MODE_DEPTH_FOG
         if (depthFog(small, depth8, display) != 0) {
           display = small;
         }
       }
-      cv::imshow(windowName, display);
-      continue;
     }
 
     if (mode == MODE_COLOR) {
