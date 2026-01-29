@@ -43,4 +43,7 @@ int negative(cv::Mat& src, cv::Mat& dst);
 // Emboss effect using Sobel X and Y
 int emboss(cv::Mat& src, cv::Mat& dst);
 
+// Sepia tone with vignetting (extension)
+int sepiaVignette(cv::Mat& src, cv::Mat& dst);
+
 #endif

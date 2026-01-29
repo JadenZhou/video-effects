@@ -19,6 +19,7 @@
  * - 'n' = negative
  * - 'e' = emboss
  * - 'u' = pixelate
+ * - 'v' = sepia vignette
  * - 'r' = reset filters
  * - 's' = save
  * - 'q' = quit
@@ -49,7 +50,8 @@ enum Mode {
   MODE_DEPTH_FOG,
   MODE_NEG,
   MODE_EMBOSS,
-  MODE_FACE_PIXELATE
+  MODE_FACE_PIXELATE,
+  MODE_SEPIA_VIGNETTE
 };
 
 static const char* modeName(Mode m) {
@@ -227,6 +229,9 @@ int main(int argc, char* argv[]) {
         cv::resize(small, roi, roi.size(), 0, 0, cv::INTER_NEAREST);
       }
 
+    } else if (mode == MODE_SEPIA_VIGNETTE) {
+      if (sepiaVignette(src, display) != 0)
+        display = src.clone();
     } else {
       display = src.clone();
     }
@@ -267,6 +272,8 @@ int main(int argc, char* argv[]) {
       mode = MODE_EMBOSS;
     } else if (key == 'u') { // pixelate face
       mode = MODE_FACE_PIXELATE;
+    } else if (key == 'v') { // sepia vignette
+      mode = MODE_SEPIA_VIGNETTE;
     } else if (key == 's') { // save
       std::time_t t = std::time(nullptr);
       char outname[256];
