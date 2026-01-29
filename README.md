@@ -24,9 +24,10 @@ make all
 
 This will generate the following executables in the `bin/` directory:
 
+* `img`: A simple utility to read and display an image.
 * `vid`: The main live video processing application.
+* `time`: A utility for timing blur implementations
 * `img-effects`: A utility for applying filters to static images (Extension).
-* `imgDisplay`: A simple utility to read and display an image.
 
 ---
 
