@@ -1,4 +1,4 @@
-# Project 1: Video-Special Effects
+Video-Special Effects
 
 ## **Overview**
 
